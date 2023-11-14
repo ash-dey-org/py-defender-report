@@ -92,7 +92,7 @@ def defenderReport():
     jsonResponse = json.loads(response.read())
     schema = jsonResponse["Schema"]
     results = jsonResponse["Results"]
-    print(results)
+    # print(results)
 
     # export output from query to a text file containing json array
     """
