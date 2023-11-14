@@ -7,14 +7,14 @@ pool:
 
 variables:
   # Azure service connection established during pipeline creation
-  azureSubscription: 'sc-defender-report-prd'
-  appName: 'vsad-p-defender-report-alfa'
+  serviceConnection: "sc-defender-report-prd"
+  functionAppName: "vsad-p-defender-report-alfa"
   # Agent VM image name
   vmImageName: 'ubuntu-latest'
 
 steps:
 - task: UsePythonVersion@0
-  displayName: "Setting Python version to 3.7 as required by functions"
+  displayName: "Setting Python version to 3.10 as required by functions"
   inputs:
     versionSpec: '3.10'
     architecture: 'x64'
@@ -37,9 +37,9 @@ steps:
 
 - task: AzureFunctionApp@2 # Add this at the end of your file
   inputs:
-    azureSubscription: <Azure service connection>
+    azureSubscription: $(serviceConnection)
     appType: functionAppLinux # default is functionApp
-    appName: $(appName)
+    appName: $(functionAppName)
     package: $(System.ArtifactsDirectory)/**/*.zip
     deploymentMethod: 'auto' # 'auto' | 'zipDeploy' | 'runFromPackage'. Required. Deployment method. Default: auto.
     #Uncomment the next lines to deploy to a deployment slot
