@@ -1,0 +1,8 @@
+DeviceTvmSoftwareVulnerabilities
+| where VulnerabilitySeverityLevel == 'High' or VulnerabilitySeverityLevel == 'Critical' or VulnerabilitySeverityLevel == 'Medium' or VulnerabilitySeverityLevel == 'Low'
+| extend p = bag_pack(CveId, VulnerabilitySeverityLevel)
+| join kind=leftouter DeviceTvmSoftwareVulnerabilitiesKB on CveId
+| summarize CVEs = make_bag(p) by DeviceName, DeviceId, SoftwareName, SoftwareVendor, OSPlatform, OSVersion, VulnerabilitySeverityLevel, IsExploitAvailable, RecommendedSecurityUpdate
+| join kind=leftouter (DeviceLogonEvents | summarize LatestTimestamp = max(Timestamp) by DeviceId) on DeviceId
+| where LatestTimestamp > ago(7d)
+| extend LastSeenDate = format_datetime(LatestTimestamp, 'dd/MM/yyyy'), TimeSeen = format_datetime(LatestTimestamp, 'HH:mm:ss')
