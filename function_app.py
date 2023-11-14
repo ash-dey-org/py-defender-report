@@ -45,7 +45,7 @@ body = {
 app = func.FunctionApp()
 
 @app.function_name(name="mytimer")
-@app.schedule(schedule="* */30 * * * *",
+@app.schedule(schedule="* * 20 * * *",
               arg_name="mytimer",
               run_on_startup=True)
 def test_function(mytimer: func.TimerRequest) -> None:
@@ -131,7 +131,7 @@ def defenderReport():
     output_file.close()
     # time.sleep(1)
 
-
+    """
     # upload logs to Sumologic
     print("uploading data to sumologic......")
     cmd = 'curl -v -X POST -H "X-Sumo-Category:security/defender/hunting" -H "X-Sumo-Name:%s" -T %s %s --ssl-no-revoke' %(file_path_txt, file_path_txt, sumourl)
@@ -139,6 +139,7 @@ def defenderReport():
     returned_value = os.system(cmd)
     # print('returned value:', returned_value)
     print("Done.... Check Somologic portal for uploaded data.")
+    """
 
     return file_path_csv
 
