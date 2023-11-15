@@ -45,7 +45,7 @@ body = {
 app = func.FunctionApp()
 
 @app.function_name(name="mytimer")
-@app.schedule(schedule="* * 22 * * *",
+@app.schedule(schedule="0 0 22 * * *",
               arg_name="mytimer",
               run_on_startup=True)
 def test_function(mytimer: func.TimerRequest) -> None:
