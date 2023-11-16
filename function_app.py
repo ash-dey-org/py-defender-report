@@ -47,7 +47,7 @@ app = func.FunctionApp()
 @app.function_name(name="mytimer")
 @app.schedule(schedule="0 0 22 * * *",
               arg_name="mytimer",
-              run_on_startup=True)
+              run_on_startup=False)
 def test_function(mytimer: func.TimerRequest) -> None:
     utc_timestamp = datetime.datetime.utcnow().replace(
         tzinfo=datetime.timezone.utc).isoformat()
@@ -154,14 +154,14 @@ def sendEmail(attachment):
 
     message = {
         "content": {
-            "subject": "This is the subject",
-            "plainText": "This is the body",
-            "html": "<html><h1>This is the body</h1></html>"
+            "subject": "Defender Vulnerability Report",
+            "plainText": "Copy the content of the attached CSV file into the excel file in Teams channel: IT Infrastructure and Operations Team > Files > Security Reporting > Defender > Defender-critical-high-with-exploit.xlsx > 'Defender-critical-high-with-exp' Tab. After copying go to 'summary' tab > click anywhere inside table > PivotTable > Refress All data"
+
         },
         "recipients": {
             "to": [
                 {
-                    "address": "ashabc@hotmail.com",
+                    "address": "ash.dey@standards.org.au",
                     "displayName": "Ash Dey"
                 }
             ]
