@@ -104,8 +104,9 @@ def defenderReport():
     """
 
     current_date = time.strftime("%Y%m%d")
-    file_path_txt = f"defender_log_{current_date}.txt"
-    file_path_csv = f"defender_log_{current_date}.csv"
+    directory_path = "/tmp/"
+    file_path_txt = f"{directory_path}defender_log_{current_date}.txt"
+    file_path_csv = f"{directory_path}defender_log_{current_date}.csv"
     # filenametxt = f"defender_log_{current_date}.txt"
     # filenamecsv = f"defender_log_{current_date}.csv"
     # file_path_txt = os.path.join(downloads_folder, filenametxt)
