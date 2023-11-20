@@ -174,7 +174,7 @@ def sendEmail(attachment):
         ],
         "attachments": [
             {
-                "name": "defender-report",
+                "name": "defender-report.csv",
                 "contentType": "text/csv",
                 "contentInBase64": file_bytes_b64.decode()
             }
