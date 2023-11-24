@@ -162,6 +162,18 @@ def sendEmail(attachment):
                 {
                     "address": "ash.dey@standards.org.au",
                     "displayName": "Ash Dey"
+                },
+                {
+                    "address": "jason.santoso@standards.org.au",
+                    "displayName": "Jason Santoso"
+                },
+                {
+                    "address": "stephen.barbero@standards.org.au",
+                    "displayName": "Stephen Barbero"
+                },
+                {
+                    "address": "ajaya.paudel@standards.org.au",
+                    "displayName": "Ajaya Poudel"
                 }
             ]
         },
