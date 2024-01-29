@@ -1,5 +1,10 @@
 
-pr: none
+trigger: none
+
+pr:
+ branches:
+  include:
+    - main
 
 pool:
   vmImage: ubuntu-latest
@@ -11,45 +16,47 @@ variables:
   # Agent VM image name
   vmImageName: 'ubuntu-latest'
 
-steps:
-- script: Run on PR Merge to main branch
-  # condition: and(succeeded(), eq(variables['Build.SourceBranchName'], 'main'), eq(variables['Build.Reason'], 'PullRequest'))
-  condition: and(eq(variables['Build.SourceBranchName'], 'main'), eq(variables['Build.Reason'], 'IndividualCI'))
+jobs:
+- job: BuildAndDeploy
+  displayName: 'Build and Deploy'
+  condition: and(succeeded(), eq(variables['System.PullRequest.SourceBranch'], 'refs/heads/main'))
+  steps:
+  - checkout: self
 
-- task: UsePythonVersion@0
-  displayName: "Setting Python version to 3.10 as required by functions"
-  inputs:
-    versionSpec: '3.10'
-    architecture: 'x64'
+  - task: UsePythonVersion@0
+    displayName: "Setting Python version to 3.10 as required by functions"
+    inputs:
+      versionSpec: '3.10'
+      architecture: 'x64'
 
-- bash: |
-    if [ -f extensions.csproj ]
-    then
-        dotnet build extensions.csproj --output ./bin
-    fi
-    pip install --target="./.python_packages/lib/site-packages" -r ./requirements.txt
+  - bash: |
+      if [ -f extensions.csproj ]
+      then
+          dotnet build extensions.csproj --output ./bin
+      fi
+      pip install --target="./.python_packages/lib/site-packages" -r ./requirements.txt
 
-- task: ArchiveFiles@2
-  displayName: "Archive files"
-  inputs:
-    rootFolderOrFile: "$(System.DefaultWorkingDirectory)"
-    includeRootFolder: false
-    archiveFile: "$(System.DefaultWorkingDirectory)/build$(Build.BuildId).zip"
+  - task: ArchiveFiles@2
+    displayName: "Archive files"
+    inputs:
+      rootFolderOrFile: "$(System.DefaultWorkingDirectory)"
+      includeRootFolder: false
+      archiveFile: "$(System.DefaultWorkingDirectory)/build$(Build.BuildId).zip"
 
-- task: PublishBuildArtifacts@1
-  inputs:
-    PathtoPublish: '$(System.DefaultWorkingDirectory)/build$(Build.BuildId).zip'
-    artifactName: 'drop'
+  - task: PublishBuildArtifacts@1
+    inputs:
+      PathtoPublish: '$(System.DefaultWorkingDirectory)/build$(Build.BuildId).zip'
+      artifactName: 'drop'
 
-#- task: AzureFunctionApp@2 # Add this at the end of your file
-  #inputs:
-    #azureSubscription: $(serviceConnection)
-    #appType: functionAppLinux # default is functionApp
-    #appName: $(functionAppName)
-    #package: '$(System.DefaultWorkingDirectory)/build$(Build.BuildId).zip'  #$(System.ArtifactsDirectory)/**/*.zip
-    #deploymentMethod: 'auto' # 'auto' | 'zipDeploy' | 'runFromPackage'. Required. Deployment method. Default: auto.
-    #Uncomment the next lines to deploy to a deployment slot
-    #Note that deployment slots is not supported for Linux Dynamic SKU
-    #deployToSlotOrASE: true
-    #resourceGroupName: '<Resource Group Name>'
-    #slotName: '<Slot name>'
+  #- task: AzureFunctionApp@2 # Add this at the end of your file
+    #inputs:
+      #azureSubscription: $(serviceConnection)
+      #appType: functionAppLinux # default is functionApp
+      #appName: $(functionAppName)
+      #package: '$(System.DefaultWorkingDirectory)/build$(Build.BuildId).zip'  #$(System.ArtifactsDirectory)/**/*.zip
+      #deploymentMethod: 'auto' # 'auto' | 'zipDeploy' | 'runFromPackage'. Required. Deployment method. Default: auto.
+      #Uncomment the next lines to deploy to a deployment slot
+      #Note that deployment slots is not supported for Linux Dynamic SKU
+      #deployToSlotOrASE: true
+      #resourceGroupName: '<Resource Group Name>'
+      #slotName: '<Slot name>'
