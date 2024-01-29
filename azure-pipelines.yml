@@ -2,9 +2,9 @@
 # https://stackoverflow.com/questions/69992161/run-task-in-azure-pipeline-only-if-the-pull-request-is-being-merged
 # to do - try using a template
 
-trigger: none
+# trigger: none
 
-pr:
+trigger:
  branches:
   include:
     - main
