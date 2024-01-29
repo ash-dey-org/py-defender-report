@@ -2,9 +2,9 @@
 # https://stackoverflow.com/questions/69992161/run-task-in-azure-pipeline-only-if-the-pull-request-is-being-merged
 # to do - try using a template
 
-trigger: none
+# trigger: none
 
-pr:
+trigger:
  branches:
   include:
     - main
@@ -25,6 +25,8 @@ jobs:
   # condition: and(eq(variables['Build.SourceBranchName'], 'main'), eq(variables['Build.Reason'], 'IndividualCI'))
   # condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI'))
   condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'), eq(variables['Build.Reason'], 'IndividualCI'))
+  # condition: and(succeeded(), eq(variables['System.PullRequest.SourceBranch'], 'refs/heads/main'))
+  # condition: and(succeeded(), eq(variables['Build.Reason'], 'PullRequest'))
 
   steps:
   - checkout: self
