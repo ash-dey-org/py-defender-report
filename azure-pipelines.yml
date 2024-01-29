@@ -1,4 +1,6 @@
 
+# https://stackoverflow.com/questions/69992161/run-task-in-azure-pipeline-only-if-the-pull-request-is-being-merged
+
 trigger: none
 
 pr:
