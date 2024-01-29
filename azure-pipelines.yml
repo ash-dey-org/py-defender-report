@@ -22,7 +22,7 @@ jobs:
 - job: BuildAndDeploy
   displayName: 'Build and Deploy'
   # condition: and(succeeded(), eq(variables['System.PullRequest.SourceBranch'], 'refs/heads/main'))
-  condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/master'), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI'))
+  condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI'))
 
   steps:
   - checkout: self
