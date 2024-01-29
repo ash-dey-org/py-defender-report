@@ -1,8 +1,5 @@
 
-pr:
- branches:
-  include:
-    - main
+pr: none
 
 pool:
   vmImage: ubuntu-latest
@@ -16,7 +13,8 @@ variables:
 
 steps:
 - script: Run on PR Merge to main branch
-  condition: and(succeeded(), eq(variables['Build.Reason'], 'PullRequest'))
+  # condition: and(succeeded(), eq(variables['Build.SourceBranchName'], 'main'), eq(variables['Build.Reason'], 'PullRequest'))
+  condition: and(eq(variables['Build.SourceBranchName'], 'main'), eq(variables['Build.Reason'], 'IndividualCI'))
 
 - task: UsePythonVersion@0
   displayName: "Setting Python version to 3.10 as required by functions"
