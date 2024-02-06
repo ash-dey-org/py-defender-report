@@ -1,6 +1,18 @@
+# define report
+# upload to Sumologic
+# download file from sharepoint
+# update excel
+# upload updated to sharepoint
+# send email
+
 # pip install azure-identity
 # pip install azure-communication-identity
 # pip install azure-communication-email
+# pip install azure-keyvault-secrets
+# pip install azure-keyvault-certificates
+# pip install office365-REST-Python-Client
+# pip install openpyxl
+# pip install azure-functions
 
 import os
 import time
@@ -16,18 +28,24 @@ import azure.functions as func
 import base64
 from azure.communication.email import EmailClient
 
-# from azure.identity import DefaultAzureCredential
-# To use Azure Active Directory Authentication (DefaultAzureCredential) make sure to have AZURE_TENANT_ID, AZURE_CLIENT_ID and AZURE_CLIENT_SECRET as env variables.
+from azure.identity import DefaultAzureCredential
+from azure.keyvault.secrets import SecretClient
+from azure.keyvault.certificates import CertificateClient
 
+from office365.sharepoint.client_context import ClientContext
 
+from openpyxl import load_workbook
 
 # define environment variables and other fixed parameters
 tenantId = os.environ.get('azure_tenant_id')
 appId = os.environ.get('defender_app_id')
 appSecret = os.environ.get('defender_app_secret')
-sumourl = os.environ.get('sumo_collector_url')
-
-
+sumoUrl = os.environ.get('sumo_collector_url')
+kvUrl = os.environ.get('kv_url')
+certName = os.environ.get('cert_name')
+sharepointUrl = os.environ.get('sharepoint_url')
+sharepointDir = os.environ.get('sharepoint_dir')
+sharepointFilePath = os.environ.get('sharepoint_file_path')
 
 url = "https://login.microsoftonline.com/%s/oauth2/token" % (tenantId)
 
@@ -39,7 +57,6 @@ body = {
     'client_secret' : appSecret,
     'grant_type' : 'client_credentials'
 }
-
 
 # define function app and its scehdule
 app = func.FunctionApp()
@@ -54,9 +71,15 @@ def test_function(mytimer: func.TimerRequest) -> None:
     if mytimer.past_due:
         logging.info('The timer is past due!')
     logging.info('Python timer trigger function ran at %s', utc_timestamp)
-    filename = defenderReport()
-    print("file name is:", filename)
-    sendEmail(filename)
+    result = defenderReport()
+    uploadDataToSumologic(result[0],sumoUrl)
+    print("txt file name is:", result[0])
+    print("csv file name is:", result[1])
+    ctx = authneticateToSharepoint(kvUrl, certName, sharepointUrl)
+    fileDownload = downloadFile(ctx, sharepointFilePath)
+    updateExcel(fileDownload, result[1])
+    uploadFile (ctx, fileDownload, sharepointDir)
+    sendEmail(result[1])
 
 
 def defenderReport():
@@ -132,7 +155,9 @@ def defenderReport():
     output_file.close()
     # time.sleep(1)
 
+    return file_path_txt, file_path_csv
 
+def uploadDataToSumologic(file_path_txt:str,sumourl:str):
     # upload logs to Sumologic
     print("uploading data to sumologic......")
     cmd = 'curl -v -X POST -H "X-Sumo-Category:security/defender/hunting" -H "X-Sumo-Name:%s" -T %s %s --ssl-no-revoke' %(file_path_txt, file_path_txt, sumourl)
@@ -141,8 +166,77 @@ def defenderReport():
     # print('returned value:', returned_value)
     print("Done.... Check Somologic portal for uploaded data.")
 
-    return file_path_csv
+def authneticateToSharepoint(kv_url:str, cert_name:str, sharepoint_url:str):
 
+    # Securely retrieve secrets from Azure Key Vault
+    credential = DefaultAzureCredential()
+    certificate_client = CertificateClient(vault_url=kv_url, credential=credential)
+    certificate = certificate_client.get_certificate(certificate_name=cert_name)
+    client = SecretClient(vault_url=kv_url, credential=credential)
+
+    # download pem file from key vault
+    with open("temp.pem", "w") as pem_file:
+        pem_file.write(client.get_secret(cert_name).value)
+
+    client_id = appId   # client.get_secret("defender-app-id").value
+    tenant_id = tenantId  # client.get_secret("azure-tenant-id").value
+    cert_thumbprint = certificate.properties.x509_thumbprint.hex()
+
+    cert_credentials = {
+        "tenant": tenant_id,
+        "client_id": client_id,
+        "thumbprint": cert_thumbprint,
+        "cert_path": "{0}/temp.pem".format(os.path.dirname(__file__)),
+    }
+
+    ctx = ClientContext(sharepoint_url).with_client_certificate(**cert_credentials)
+
+    os.remove("temp.pem")
+    return ctx
+
+def downloadFile(ctx, sharepoint_file_path:str):
+    download_path = os.path.join(os.getcwd(), os.path.basename(sharepoint_file_path))
+    with open(download_path, "wb") as local_file:
+        file = (
+            ctx.web.get_file_by_server_relative_url(sharepoint_file_path)
+            .download(local_file)
+            .execute_query()
+        )
+    print("[Ok] file has been downloaded into: {0}".format(download_path))
+    return download_path
+
+def updateExcel(src_file:str, csv_file:str):
+    # load workbook
+    wb1 = load_workbook(src_file)
+
+    # delete exisitng worksheet
+    wb1.remove(wb1['Defender-critical-high-with-exp'])
+
+    # create new worksheet at the end
+    wb1.create_sheet("Defender-critical-high-with-exp")
+
+    #load worksheet
+    ws1 = wb1["Defender-critical-high-with-exp"]
+
+     # open the csv file
+
+    with open(csv_file) as f:
+        reader = csv.reader(f, delimiter=',')
+
+        for row in reader:
+            ws1.append(row)
+
+    # save worksheet
+    wb1.save(src_file)
+    print("Excel sheet ", src_file, "updated with new data")
+
+def uploadFile(ctx,filename:str, sharepoint_dir:str):
+    web = ctx.web.get_folder_by_server_relative_url(sharepoint_dir)
+
+    with open(filename, "rb") as content_file:
+        file_content = content_file.read()
+    file = web.upload_file(os.path.basename(filename), file_content).execute_query()
+    print("File has been uploaded into: {0}".format(file.serverRelativeUrl))
 
 def sendEmail(attachment):
 
@@ -210,3 +304,19 @@ def sendEmail(attachment):
 
     except Exception as ex:
         print(ex)
+
+'''
+# this part goes inside test function at the top
+# used for local testing, comment this section after testing
+# uncomment top section and # import azure.functions as func - before pushing code into azure function app
+result = defenderReport()
+uploadDataToSumologic(result[0],sumoUrl)
+print("txt file name is:", result[0])
+print("csv file name is:", result[1])
+ctx = authneticateToSharepoint(kvUrl, certName, sharepointUrl)
+fileDownload = downloadFile(ctx, sharepointFilePath)
+updateExcel(fileDownload, result[1])
+uploadFile (ctx, fileDownload, sharepointDir)
+sendEmail(result[1])
+
+'''
