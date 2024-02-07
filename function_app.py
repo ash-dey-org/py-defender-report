@@ -1,4 +1,4 @@
-# define report
+# Extract report from Defender API
 # upload to Sumologic
 # download file from sharepoint
 # update excel
