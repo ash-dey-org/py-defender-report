@@ -62,7 +62,8 @@ body = {
 app = func.FunctionApp()
 
 @app.function_name(name="mytimer")
-@app.schedule(schedule="0 0 22 * * *",
+# @app.schedule(schedule="0 0 22 * * *",
+@app.schedule(schedule="0 0 * * * *",
               arg_name="mytimer",
               run_on_startup=False)
 def test_function(mytimer: func.TimerRequest) -> None:
@@ -72,7 +73,7 @@ def test_function(mytimer: func.TimerRequest) -> None:
         logging.info('The timer is past due!')
     logging.info('Python timer trigger function ran at %s', utc_timestamp)
     result = defenderReport()
-    uploadDataToSumologic(result[0],sumoUrl)
+    # uploadDataToSumologic(result[0],sumoUrl)
     print("txt file name is:", result[0])
     print("csv file name is:", result[1])
     ctx = authneticateToSharepoint(kvUrl, certName, sharepointUrl)
