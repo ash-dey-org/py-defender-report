@@ -61,27 +61,47 @@ body = {
 # define function app and its scehdule
 app = func.FunctionApp()
 
-# @app.function_name(name="mytimer")
-@app.schedule(schedule="0 0 22 * * *",
+@app.function_name(name="updateSharepoint")
+@app.schedule(schedule="0 0 * * * *",
 # @app.schedule(schedule="0 */10 * * * *",
-              arg_name="mytimer",
+              arg_name="updateSharepoint",
               run_on_startup=False)
-def test_function(mytimer: func.TimerRequest) -> None:
+def test_function(updateSharepoint: func.TimerRequest) -> None:
     utc_timestamp = datetime.datetime.utcnow().replace(
         tzinfo=datetime.timezone.utc).isoformat()
-    if mytimer.past_due:
+    if updateSharepoint.past_due:
         logging.info('The timer is past due!')
     logging.info('Python timer trigger function ran at %s', utc_timestamp)
     result = defenderReport()
-    uploadDataToSumologic(result[0],sumoUrl)
+    # uploadDataToSumologic(result[0],sumoUrl)
     print("txt file name is:", result[0])
     print("csv file name is:", result[1])
     ctx = authneticateToSharepoint(kvUrl, certName, sharepointUrl)
     fileDownload = downloadFile(ctx, sharepointFilePath)
     updateExcel(fileDownload, result[1])
     uploadFile (ctx, fileDownload, sharepointDir)
-    sendEmail(result[1])
+    # sendEmail(result[1])
 
+@app.function_name(name="updateSumologic")
+@app.schedule(schedule="0 15 22 * * *",
+# @app.schedule(schedule="0 */10 * * * *",
+              arg_name="updateSumologic",
+              run_on_startup=False)
+def test_function(updateSumologic: func.TimerRequest) -> None:
+    utc_timestamp = datetime.datetime.utcnow().replace(
+        tzinfo=datetime.timezone.utc).isoformat()
+    if updateSumologic.past_due:
+        logging.info('The timer is past due!')
+    logging.info('Python timer trigger function ran at %s', utc_timestamp)
+    result = defenderReport()
+    uploadDataToSumologic(result[0],sumoUrl)
+    print("txt file name is:", result[0])
+    print("csv file name is:", result[1])
+    # ctx = authneticateToSharepoint(kvUrl, certName, sharepointUrl)
+    # fileDownload = downloadFile(ctx, sharepointFilePath)
+    # updateExcel(fileDownload, result[1])
+    # uploadFile (ctx, fileDownload, sharepointDir)
+    sendEmail(result[1])
 
 def defenderReport():
 
