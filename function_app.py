@@ -63,7 +63,7 @@ app = func.FunctionApp()
 
 # @app.function_name(name="mytimer")
 @app.schedule(schedule="0 0 22 * * *",
-@app.schedule(schedule="0 */10 * * * *",
+# @app.schedule(schedule="0 */10 * * * *",
               arg_name="mytimer",
               run_on_startup=False)
 def test_function(mytimer: func.TimerRequest) -> None:
