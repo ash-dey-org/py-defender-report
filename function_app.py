@@ -80,7 +80,7 @@ def test_function1(updateSharepoint: func.TimerRequest) -> None:
     fileDownload = downloadFile(ctx, sharepointFilePath)
     updateExcel(fileDownload, result[1])
     uploadFile (ctx, fileDownload, sharepointDir)
-    # sendEmail(result[1])
+    sendEmail(result[1])
 
 @app.function_name(name="updateSumologic")
 @app.schedule(schedule="0 15 22 * * *",
