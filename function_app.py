@@ -66,7 +66,7 @@ app = func.FunctionApp()
 # @app.schedule(schedule="0 */10 * * * *",
               arg_name="updateSharepoint",
               run_on_startup=False)
-def test_function(updateSharepoint: func.TimerRequest) -> None:
+def test_function1(updateSharepoint: func.TimerRequest) -> None:
     utc_timestamp = datetime.datetime.utcnow().replace(
         tzinfo=datetime.timezone.utc).isoformat()
     if updateSharepoint.past_due:
@@ -87,7 +87,7 @@ def test_function(updateSharepoint: func.TimerRequest) -> None:
 # @app.schedule(schedule="0 */10 * * * *",
               arg_name="updateSumologic",
               run_on_startup=False)
-def test_function(updateSumologic: func.TimerRequest) -> None:
+def test_function2(updateSumologic: func.TimerRequest) -> None:
     utc_timestamp = datetime.datetime.utcnow().replace(
         tzinfo=datetime.timezone.utc).isoformat()
     if updateSumologic.past_due:
