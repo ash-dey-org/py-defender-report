@@ -62,13 +62,12 @@ body = {
 app = func.FunctionApp()
 
 @app.function_name(name="updateSharepoint")
-@app.schedule(schedule="0 0 * * * *",
+@app.schedule(schedule="0 0 */3 * * *",
 # @app.schedule(schedule="0 */10 * * * *",
               arg_name="updateSharepoint",
               run_on_startup=False)
 def test_function1(updateSharepoint: func.TimerRequest) -> None:
-    utc_timestamp = datetime.datetime.utcnow().replace(
-        tzinfo=datetime.timezone.utc).isoformat()
+    utc_timestamp = datetime.datetime.now(datetime.timezone.utc).isoformat()
     if updateSharepoint.past_due:
         logging.info('The timer is past due!')
     logging.info('Python timer trigger function ran at %s', utc_timestamp)
@@ -88,8 +87,7 @@ def test_function1(updateSharepoint: func.TimerRequest) -> None:
               arg_name="updateSumologic",
               run_on_startup=False)
 def test_function2(updateSumologic: func.TimerRequest) -> None:
-    utc_timestamp = datetime.datetime.utcnow().replace(
-        tzinfo=datetime.timezone.utc).isoformat()
+    utc_timestamp = datetime.datetime.now(datetime.timezone.utc).isoformat()
     if updateSumologic.past_due:
         logging.info('The timer is past due!')
     logging.info('Python timer trigger function ran at %s', utc_timestamp)
