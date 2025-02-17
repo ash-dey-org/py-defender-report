@@ -1,0 +1,2 @@
+DeviceInfo
+| summarize LatestEntry = arg_max(Timestamp, *) by DeviceId
