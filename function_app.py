@@ -96,7 +96,7 @@ def test_function1(updateSharepoint: func.TimerRequest) -> None:
 '''
 
 @app.function_name(name="updateSharepoint")
-@app.schedule(schedule="0 20 6 * * *",
+@app.schedule(schedule="0 20 5 * * *",
 # @app.schedule(schedule="0 */10 * * * *",
               arg_name="updateSharepoint",
               run_on_startup=True)
@@ -171,7 +171,7 @@ def defenderReport():
     # Authenticate to Azure uisng aap client and secret and get token
     data = urllib.parse.urlencode(body).encode("utf-8")
 
-    req = urllib.request.Request(url, data)
+    req = urllib.request.Request(urlauth, data)
     response = urllib.request.urlopen(req)
     jsonResponse = json.loads(response.read())
     aadToken = jsonResponse["access_token"]
