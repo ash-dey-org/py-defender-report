@@ -107,7 +107,8 @@ def test_function1(updateSharepoint: func.TimerRequest) -> None:
     logging.info('Python timer trigger function ran at %s', utc_timestamp)
     # extract summary report
     summary_file = defenderSummary("InfraReporting-defender-summary")
-    print(summary_file)
+    print("txt file name is:", summary_file[0])
+    print("csv file name is:", summary_file[1])
 
     # Extract device info
     device_file=defenderAdvanceHunting("device")
@@ -139,7 +140,7 @@ def test_function1(updateSharepoint: func.TimerRequest) -> None:
 
     ctx = authneticateToSharepoint(kvUrl, certName, sharepointUrl)
 
-    uploadFile (ctx, summary_file, sharepointDir)
+    uploadFile (ctx, summary_file[1], sharepointDir)
     uploadFile (ctx, evidence_file, sharepointDir)
     uploadFile (ctx, critical_file_merged, sharepointDir)
     uploadFile (ctx, high_file_merged, sharepointDir)
@@ -156,15 +157,14 @@ def test_function2(updateSumologic: func.TimerRequest) -> None:
     if updateSumologic.past_due:
         logging.info('The timer is past due!')
     logging.info('Python timer trigger function ran at %s', utc_timestamp)
-    result = defenderReport()
-    uploadDataToSumologic(result[0],sumoUrl)
-    print("txt file name is:", result[0])
-    print("csv file name is:", result[1])
-    # ctx = authneticateToSharepoint(kvUrl, certName, sharepointUrl)
-    # fileDownload = downloadFile(ctx, sharepointFilePath)
-    # updateExcel(fileDownload, result[1])
-    # uploadFile (ctx, fileDownload, sharepointDir)
-    sendEmail(result[1])
+    summary_file = defenderSummary("InfraReporting-defender-summary")
+    print("txt file name is:", summary_file[0])
+    print("csv file name is:", summary_file[1])
+    # result = defenderReport()
+    uploadDataToSumologic(summary_file[0],sumoUrl)
+    print("txt file name is:", summary_file[0])
+    print("csv file name is:", summary_file[1])
+    # sendEmail(result[1])
 
 def defenderReport():
 
@@ -464,6 +464,8 @@ def defenderSummary(output_file):
     # Define CSV file name
     # csv_file = "vulnerabilities-summary.csv"
     directory_path = "/tmp/"
+    date_prefix = datetime.now().strftime("%Y-%m-%d")
+    file_path_txt = f"{directory_path}{output_file}-{date_prefix}.txt"
     file_path_csv = f"{directory_path}{output_file}.csv"
 
     # Check if there are valid entries
@@ -482,10 +484,20 @@ def defenderSummary(output_file):
             writer.writerows(filtered_vulnerabilities)
 
         print(f"CSV file '{file_path_csv}' has been created successfully with {len(filtered_vulnerabilities)} valid rows.")
+
+        # write to txt file
+        with open(file_path_csv, mode="r", encoding="utf-8") as file, open(file_path_txt, mode="w", encoding="utf-8") as out_file:
+            csv_reader = csv.DictReader(file)  # Reads CSV as dictionaries
+            for row in csv_reader:
+                json.dump(row, out_file)  # Convert row dictionary to JSON
+                out_file.write("\n")  # Newline for each entry
+
+        print(f"Converted {file_path_csv} to {file_path_txt} successfully!")
+
     else:
         print("No valid CVE entries found. CSV file not created.")
 
-    return file_path_csv
+    return file_path_txt, file_path_csv
 
 # Function to run defender advance queries
 def defenderAdvanceHunting(query_file):
