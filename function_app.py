@@ -157,12 +157,12 @@ def test_function2(updateSumologic: func.TimerRequest) -> None:
     if updateSumologic.past_due:
         logging.info('The timer is past due!')
     logging.info('Python timer trigger function ran at %s', utc_timestamp)
-    print ("updating sumologic.... need to revive content before uploading to Sumo")
-    # summary_file = defenderSummary("InfraReporting-defender-summary")
-    # print("txt file name is:", summary_file[0])
-    # print("csv file name is:", summary_file[1])
+    # print ("updating sumologic.... need to revive content before uploading to Sumo")
+    summary_file = defenderSummary("InfraReporting-defender-summary")
+    print("txt file name is:", summary_file[0])
+    print("csv file name is:", summary_file[1])
     # result = defenderReport()
-    # uploadDataToSumologic(summary_file[0],sumoUrl)
+    uploadDataToSumologic(summary_file[0],sumoUrl)
     # sendEmail(result[1])
 
 def defenderReport():
@@ -488,11 +488,14 @@ def defenderSummary(output_file):
 
         print(f"CSV file '{file_path_csv}' has been created successfully with {len(filtered_vulnerabilities)} valid rows.")
 
+        # Define the columns to keep
+        columns_to_keep = {"id", "severity", "exposedMachines", "publicExploit", "exploitVerified", "Age (Days)"}
         # write to txt file
         with open(file_path_csv, mode="r", encoding="utf-8") as file, open(file_path_txt, mode="w", encoding="utf-8") as out_file:
             csv_reader = csv.DictReader(file)  # Reads CSV as dictionaries
             for row in csv_reader:
-                json.dump(row, out_file)  # Convert row dictionary to JSON
+                filtered_row = {key: row[key] for key in columns_to_keep if key in row}  # Keep only specified columns
+                json.dump(filtered_row, out_file)  # Convert row dictionary to JSON
                 out_file.write("\n")  # Newline for each entry
 
         print(f"Converted {file_path_csv} to {file_path_txt} successfully!")
