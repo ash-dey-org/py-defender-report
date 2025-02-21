@@ -157,13 +157,12 @@ def test_function2(updateSumologic: func.TimerRequest) -> None:
     if updateSumologic.past_due:
         logging.info('The timer is past due!')
     logging.info('Python timer trigger function ran at %s', utc_timestamp)
-    summary_file = defenderSummary("InfraReporting-defender-summary")
-    print("txt file name is:", summary_file[0])
-    print("csv file name is:", summary_file[1])
+    print ("updating sumologic.... need to revive content before uploading to Sumo")
+    # summary_file = defenderSummary("InfraReporting-defender-summary")
+    # print("txt file name is:", summary_file[0])
+    # print("csv file name is:", summary_file[1])
     # result = defenderReport()
-    uploadDataToSumologic(summary_file[0],sumoUrl)
-    print("txt file name is:", summary_file[0])
-    print("csv file name is:", summary_file[1])
+    # uploadDataToSumologic(summary_file[0],sumoUrl)
     # sendEmail(result[1])
 
 def defenderReport():
@@ -457,6 +456,10 @@ def defenderSummary(output_file):
                 days_ago = (todays_date - published_date).days
 
         vulnerability["Age (Days)"] = days_ago
+
+        # Filter based on "exposedMachines"
+        if vulnerability.get("exposedMachines", 0) < 1:
+            continue  # Skip if exposedMachines is missing or less than 1
 
         # Append valid entries to the list
         filtered_vulnerabilities.append(vulnerability)
