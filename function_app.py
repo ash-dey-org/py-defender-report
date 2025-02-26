@@ -163,6 +163,13 @@ def test_function2(updateSumologic: func.TimerRequest) -> None:
     print("csv file name is:", summary_file[1])
     # result = defenderReport()
     uploadDataToSumologic(summary_file[0],sumoUrl)
+
+    # upload merged vulnerability files to sumologic - depends on output from test_function1
+    vul_files = ["/tmp/InfraReporting-defender-critical-merged.csv", "/tmp/InfraReporting-defender-high-merged.csv", "/tmp/InfraReporting-defender-medium-merged.csv", "/tmp/InfraReporting-defender-low-merged.csv"]
+    combined_vul_file = merge_csv_files(vul_files)
+    print(combined_vul_file)
+    uploadDataToSumologic(combined_vul_file[0],sumoUrl)
+
     # sendEmail(result[1])
 
 def defenderReport():
@@ -590,6 +597,42 @@ def mergeFiles(device_file,vulnerability_file, evidence_file):
 
     print(f"Updated file saved as {output_file}")
     return  output_file
+
+# Function to merge vulnerability csv files
+def merge_csv_files(file_list):
+
+    directory_path = "/tmp/"
+    date_prefix = datetime.now().strftime("%Y-%m-%d")
+    output_file_csv = f"{directory_path}InfraReporting-defender-vulnerability-{date_prefix}.csv"
+    output_file_txt = f"{directory_path}InfraReporting-defender-vulnerability-{date_prefix}.txt"
+
+    try:
+        # Read and concatenate only the selected CSV files
+        df_combined = pd.concat((pd.read_csv(f) for f in file_list), ignore_index=True)
+
+        # Save the combined DataFrame to a new CSV file
+        df_combined.to_csv(output_file_csv, index=False)
+
+        print(f"CSV files merged successfully into {output_file_csv}!")
+
+        # Define the columns to keep
+        columns_to_keep = ["OSPlatform", "SoftwareName", "CveId", "VulnerabilitySeverityLevel", "DeviceSeenDaysAgo"]
+        # write to txt file
+        with open(output_file_csv, mode="r", encoding="utf-8") as file, open(output_file_txt, mode="w", encoding="utf-8") as out_file:
+            csv_reader = csv.DictReader(file)  # Reads CSV as dictionaries
+            for row in csv_reader:
+                filtered_row = {key: row[key] for key in columns_to_keep if key in row}  # Keep only specified columns
+                json.dump(filtered_row, out_file)  # Convert row dictionary to JSON
+                out_file.write("\n")  # Newline for each entry
+
+        print(f"Converted {output_file_csv} to {output_file_txt} successfully!")
+
+
+        return output_file_txt, output_file_csv
+
+    except Exception as e:
+        print(f"Error: {e}")
+
 
 '''
 # this part goes inside test function at the top
