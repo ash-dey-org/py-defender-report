@@ -141,6 +141,7 @@ def test_function1(updateSharepoint: func.TimerRequest) -> None:
     ctx = authneticateToSharepoint(kvUrl, certName, sharepointUrl)
 
     uploadFile (ctx, summary_file[1], sharepointDir)
+    uploadFile (ctx, device_file, sharepointDir)
     uploadFile (ctx, evidence_file, sharepointDir)
     uploadFile (ctx, critical_file_merged, sharepointDir)
     uploadFile (ctx, high_file_merged, sharepointDir)
