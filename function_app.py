@@ -96,7 +96,7 @@ def test_function1(updateSharepoint: func.TimerRequest) -> None:
 '''
 
 @app.function_name(name="updateSharepoint")
-@app.schedule(schedule="0 20 5 * * *",
+@app.schedule(schedule="0 20 18 * * *",
 # @app.schedule(schedule="0 */10 * * * *",
               arg_name="updateSharepoint",
               run_on_startup=True)
@@ -166,7 +166,38 @@ def test_function2(updateSumologic: func.TimerRequest) -> None:
     uploadDataToSumologic(summary_file[0],sumoUrl)
 
     # upload merged vulnerability files to sumologic - depends on output from test_function1
-    vul_files = ["/tmp/InfraReporting-defender-critical-merged.csv", "/tmp/InfraReporting-defender-high-merged.csv", "/tmp/InfraReporting-defender-medium-merged.csv", "/tmp/InfraReporting-defender-low-merged.csv"]
+    # vul_files = ["/tmp/InfraReporting-defender-critical-merged.csv", "/tmp/InfraReporting-defender-high-merged.csv", "/tmp/InfraReporting-defender-medium-merged.csv", "/tmp/InfraReporting-defender-low-merged.csv"]
+
+    # Extract device info
+    device_file=defenderAdvanceHunting("device")
+    print(device_file)
+
+    # Extract evidence info
+    evidence_file=defenderAdvanceHunting("evidence")
+    print(evidence_file)
+
+    # Exctract Vulerability reports
+    critical_file=defenderAdvanceHunting("critical")
+    print(critical_file)
+    high_file=defenderAdvanceHunting("high")
+    print(high_file)
+    medium_file=defenderAdvanceHunting("medium")
+    print(medium_file)
+    low_file=defenderAdvanceHunting("low")
+    print(low_file)
+
+    # Merge vulnerability files with last see time stamp
+    critical_file_merged =  mergeFiles(device_file,critical_file,evidence_file)
+    print(critical_file_merged)
+    high_file_merged =  mergeFiles(device_file,high_file,evidence_file)
+    print(high_file_merged)
+    medium_file_merged =  mergeFiles(device_file,medium_file,evidence_file)
+    print(medium_file_merged)
+    low_file_merged =  mergeFiles(device_file,low_file,evidence_file)
+    print(low_file_merged)
+
+    # vul_files = ["/tmp/InfraReporting-defender-critical-merged.csv", "/tmp/InfraReporting-defender-high-merged.csv", "/tmp/InfraReporting-defender-medium-merged.csv", "/tmp/InfraReporting-defender-low-merged.csv"]
+    vul_files = [critical_file_merged, high_file_merged, medium_file_merged, low_file_merged]
     combined_vul_file = merge_csv_files(vul_files)
     print(combined_vul_file)
     uploadDataToSumologic(combined_vul_file[0],sumoUrl)
