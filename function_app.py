@@ -96,7 +96,7 @@ def test_function1(updateSharepoint: func.TimerRequest) -> None:
 '''
 
 @app.function_name(name="updateSharepoint")
-@app.schedule(schedule="0 20 17 * * *",
+@app.schedule(schedule="0 20 18 * * *",
 # @app.schedule(schedule="0 */10 * * * *",
               arg_name="updateSharepoint",
               run_on_startup=True)
