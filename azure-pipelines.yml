@@ -14,7 +14,7 @@ pool:
 
 variables:
   # Azure service connection established during pipeline creation
-  serviceConnection: "sc-defender-report-prd"
+  serviceConnection: "sc-defender-report-prd-new"
   functionAppName: "vsad-p-defender-report-alfa"
   # Agent VM image name
   vmImageName: 'ubuntu-latest'
