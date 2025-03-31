@@ -487,6 +487,9 @@ def defenderSummary(output_file):
         if "description" in vulnerability:
             vulnerability["description"] = vulnerability["description"][:512]  # Limit description to 512 chars
 
+        # Drop "patchFirstAvailable" if it exists
+            vulnerability.pop("patchFirstAvailable", None)
+
         # Calculate "Age Days"
         days_ago = "N/A"
         if "publishedOn" in vulnerability:
